@@ -63,4 +63,5 @@ public/uploads/
 # Generated files
 *.generated.js
 *.generated.ts
- 
+
+*.md
