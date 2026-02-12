@@ -1,8 +1,11 @@
 // const userRepository = require("../repositories/userRepository");
 
 const userRepository = require("../repositories/userMongoRepository");
+const bcrypt = require("bcryptjs");
 
 exports.createUser = async ({name,email,age,password}) =>{
+    const hashedPassword = await bcrypt.hash(password, 10);
+    password = hashedPassword;
     const newUser = await userRepository.saveUser({name,email,age, password});
     return newUser;
 }

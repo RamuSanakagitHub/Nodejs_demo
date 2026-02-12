@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './Auth.css';
 import { useNavigate } from 'react-router-dom';
+import apiService from '../services/apiService';
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -8,21 +9,38 @@ const SignUp = () => {
   const [age, setAge] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert('Passwords do not match');
       return;
     }
-    // Handle sign up logic here
-    console.log('Sign Up:', { name, email, age,password });
+    setLoading(true);
+    setError('');
+    try {
+      const response = await apiService.register({ name, email, password, age });
+      const data = await response.json();
+      if (response.ok) {
+        alert('User registered successfully');
+        navigate('/signin');
+      } else {
+        setError(data.message || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Network error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="auth-container">
       <h2>Sign Up</h2>
+      {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="name">Name:</label>

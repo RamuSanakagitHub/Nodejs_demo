@@ -1,8 +1,9 @@
 #root {
-  max-width: 1280px;
+  width: 100%;
+  /* max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  text-align: center; */
 }
 
 .logo {
@@ -47,8 +48,8 @@
   align-items: center;
 }
 .btn-signin{
-  border:1px solid blue;
-  background: blue;
+  border:1px solid #007BFF;
+  background: #007BFF;
   color: white;
   padding: 5px;
   border-radius: 8px;
@@ -56,7 +57,7 @@
 .btn-signup{
   border: 1px solid #ccc;
   background: white;
-  color: blue;
+  color: black;
   padding: 5px;
   border-radius: 8px;
 }
