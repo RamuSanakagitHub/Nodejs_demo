@@ -3,12 +3,16 @@ import './SideNav.css';
 
 const SideNav = () => {
   const location = useLocation();
+  const userRole = localStorage.getItem('role');
 
-  const menuItems = [
+  const allMenuItems = [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/users', label: 'Users' },
     { path: '/roles', label: 'Roles' },
+    { path: '/user-roles', label: 'Assign Roles' },
   ];
+
+  const menuItems = userRole === 'admin' ? allMenuItems : [{ path: '/dashboard', label: 'Dashboard' }];
 
   return (
     <nav className="side-nav">

@@ -6,6 +6,7 @@ import SignUp from './components/SignUp';
 import Dashboard from './components/Dashboard';
 import Users from './components/Users';
 import Roles from './components/Roles';
+import UserRoles from './components/UserRoles';
 import './App.css'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
             <Route path="/roles" element={<Roles />} />
+            <Route path="/user-roles" element={<UserRoles />} />
           </Route>
         </Routes>
       </div>
