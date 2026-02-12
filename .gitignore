@@ -64,4 +64,4 @@ public/uploads/
 *.generated.js
 *.generated.ts
 
-*.md
+frontend/react_node_demo/*.md
