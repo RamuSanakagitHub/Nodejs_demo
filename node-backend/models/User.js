@@ -15,6 +15,11 @@ const UserSchema = new mongoose.Schema(
         required: true,
         select: false
     },
+    fileId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "File",
+      default: null
+    },
     isDeleted: { type: Boolean, default: false},
     deletedAt: { type: Date, default: null},
   },

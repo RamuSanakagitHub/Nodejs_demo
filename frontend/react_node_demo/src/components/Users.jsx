@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Page.css';
 import apiService from '../services/apiService';
+import socketService from '../services/socketService';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -12,8 +13,36 @@ const Users = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [editingUserData, setEditingUserData] = useState(null);
+  const [newUserFile, setNewUserFile] = useState(null);
+  const [editUserFile, setEditUserFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [fileUrls, setFileUrls] = useState({});
+
 
   const token = localStorage.getItem('token');
+  const defaultUrl = "https://deiijhplbipzjmnjwoln.supabase.co/storage/v1/object/public/images/uploads/1770962653279-lxr94.png";
+
+  const handleFileUpload = async (file) => {
+    if (!file) return null;
+    
+    try {
+      setUploading(true);
+      const response = await apiService.uploadFile(file, token);
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+      
+      const result = await response.json();
+      setUploading(false);    
+      return result.mongoFile._id;
+    } catch (err) {
+      console.error('File upload error:', err);
+      setUploading(false);
+      throw err;
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -38,20 +67,63 @@ const Users = () => {
       console.error('Failed to fetch roles:', err);
     }
   };
+   const fetchAllFileUrls = async () => {
+    const newFileUrls = {};
+    for (const user of users) {
+      if (user.fileId && !fileUrls[user.fileId]) {
+        try {
+          const response = await apiService.fetchFileById(user.fileId, token);
+          if (response.ok) {
+            const data = await response.json();
+            newFileUrls[user.fileId] = data.fileUrl;
+          }
+        } catch (err) {
+          console.error("Error fetching file for user:", user.name, err);
+        }
+      }
+    }
+    setFileUrls(prev => ({ ...prev, ...newFileUrls }));
+  };
 
   useEffect(() => {
     fetchUsers();
     fetchRoles();
+    socketService.connect()
+    const handleNewUser = (newUser) => {
+      setUsers(prevUsers => [...prevUsers, newUser]);
+    };
+    socketService.on("userCreated", handleNewUser);
+
+    // Cleanup on unmount
+    return () => {
+      socketService.off("userCreated", handleNewUser);
+      socketService.disconnect();
+    };
   }, []);
+
+  useEffect(() => {
+    if (users.length === 0) return;
+    fetchAllFileUrls();
+  }, [users]);
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
     try {
-      const response = await apiService.saveUser(newUser, token);
+      let fileId = null;
+      if(newUserFile){
+        fileId = await handleFileUpload(newUserFile);
+      }
+      const payload = {
+        ...newUser,
+        password: 'Rbac@1234',
+        fileId
+      }
+      const response = await apiService.saveUser(payload, token);
       if (!response.ok) throw new Error('Failed to create user');
       const createdUser = await response.json();
       setUsers([...users, createdUser]);
-      setNewUser({ name: '', email: '', age: '', role: 'user' });
+      setNewUser({ name: '', email: '', age: '', role: 'user'});
+      setShowPopup(false);
     } catch (err) {
       setError(err.message);
     }
@@ -88,6 +160,33 @@ const Users = () => {
       setError(err.message);
     }
   };
+  const handleExport = async () => {
+     if (!window.confirm('Are you sure you want to export this users?')) return;
+     try{
+      const response = await apiService.fetchExportUsers(token);
+      if (!response.ok) throw new Error('Failed to export users');
+        // Convert response to blob
+      const blob = await response.blob();
+
+      // Create a temporary link element
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Set file name
+      link.download = 'users.xlsx';
+
+      // Append to body and trigger download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+     }catch(err){
+      setError(err.message);
+     }
+  }
 
   if (loading) return <div className="page">Loading...</div>;
   if (error) return <div className="page">Error: {error}</div>;
@@ -95,7 +194,8 @@ const Users = () => {
   return (
     <div className="page">
       <h2>Users</h2>
-       <div style={{ textAlign: 'right', marginBottom: '10px' }}>
+       <div style={{ display:'flex', gap:'10px', marginBottom: '10px',alignContent:'flex-end',justifyContent:'flex-end' }}>
+        <button onClick={handleExport} style={{ width: 'fit-content' }}>Export Users</button>
         <button onClick={() => setShowPopup(true)} style={{ width: 'fit-content' }}>Add User</button>
       </div>      
       {showPopup && (
@@ -120,6 +220,12 @@ const Users = () => {
           }}>
         <h3>Add New User</h3>
       <form onSubmit={handleCreateUser}>
+        <input
+          type="file"
+          placeholder='Drag and drop the image or upload file'         
+          onChange={(e) => setNewUserFile(e.target.files[0])}
+          required
+        />
         <input
           type="text"
           placeholder="Name"
@@ -150,7 +256,7 @@ const Users = () => {
           ))}
         </select>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-          <button type="submit">Add User</button>
+          <button type="submit">Save</button>
           <button type="button" onClick={() => setShowPopup(false)}>Cancel</button>
         </div>
       </form>
@@ -179,6 +285,12 @@ const Users = () => {
           }}>
         <h3>Edit User</h3>
       <form onSubmit={handleUpdateUser}>
+        <input
+          type="file"
+          placeholder='Drag and drop the image or upload file'     
+          onChange={(e) => setEditUserFile(e.target.files[0])}
+          required
+        />
         <input
           type="text"
           placeholder="Name"
@@ -209,7 +321,7 @@ const Users = () => {
           ))}
         </select>
         <div style={{ display: 'flex', justifyContent: 'space-between',gap:'10px', marginTop: '10px' }}>
-          <button type="submit" className='btn-signin'>Update User</button>
+          <button type="submit" className='btn-signin'>Update</button>
           <button type="button" onClick={() => setShowEditPopup(false)} className='btn-signup'>Cancel</button>
         </div>
       </form>
@@ -220,6 +332,7 @@ const Users = () => {
         <thead>
           <tr>
             <th>S.No</th>
+            <th>Profile</th>
             <th>Name</th>
             <th>Email</th>
             <th>Age</th>
@@ -231,6 +344,17 @@ const Users = () => {
           {users.map((user, index) => (
             <tr key={user._id}>
               <td>{index + 1}</td>
+              <td><img
+                src={user.fileId ? fileUrls[user.fileId] || defaultUrl : defaultUrl}
+                alt="Profile"
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  marginRight: "8px"
+                }}
+              /></td>
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.age}</td>

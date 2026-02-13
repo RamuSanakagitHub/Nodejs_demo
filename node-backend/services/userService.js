@@ -1,12 +1,13 @@
 // const userRepository = require("../repositories/userRepository");
 
 const userRepository = require("../repositories/userMongoRepository");
+const generateExcelUsers = require("../middleware/userExportMiddleware");
 const bcrypt = require("bcryptjs");
 
-exports.createUser = async ({name,email,age,password}) =>{
+exports.createUser = async ({name,email,age,password, fileId}) =>{
     const hashedPassword = await bcrypt.hash(password, 10);
     password = hashedPassword;
-    const newUser = await userRepository.saveUser({name,email,age, password});
+    const newUser = await userRepository.saveUser({name,email,age, password, fileId});
     return newUser;
 }
 exports.getAllUsers = async () =>{
@@ -30,4 +31,10 @@ exports.updateUser = async (id,userData) =>{
 }
 exports.deleteUser = async (id) =>{
     await userRepository.deleteUser(id);
+}
+
+exports.getExportUsers = async () =>{    
+    const users = await userRepository.getAllUsers();
+    const excelResponse = await generateExcelUsers(users);
+    return excelResponse;
 }

@@ -101,6 +101,49 @@ const apiService = {
       },
     });
   },
+  /** upload related Apis  */
+  
+  uploadFile: (file, token) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return fetch(`${BASE_URL}/upload/save`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+  },
+  uploadMultipleFiles: (files,token) =>{
+    return fetch(`${BASE_URL}/upload/save/multiple`,{
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: files,
+    });
+  },
+
+  fetchFileById: (fileId, token) => {
+    return fetch(`${BASE_URL}/upload/get/${fileId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+  },
+  /** export excelUsers */
+  fetchExportUsers: (token) => {
+    return fetch(`${BASE_URL}/users/export`,{
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+  }
+  
 };
+
 
 export default apiService;
