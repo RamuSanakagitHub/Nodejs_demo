@@ -53,6 +53,7 @@ const SignIn = () => {
           <input
             type="email"
             id="email"
+            autoComplete="new-email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -63,6 +64,7 @@ const SignIn = () => {
           <input
             type="password"
             id="password"
+            autocomplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

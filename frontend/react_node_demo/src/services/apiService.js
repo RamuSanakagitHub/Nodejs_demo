@@ -76,15 +76,23 @@ const apiService = {
   },
 refresh: () => refreshTokens(),
 
+// logout: async () => {
+//   const token = getAccessToken();
+//   if (token) {
+//     await authenticatedFetch(`${BASE_URL}/auth/logout`, { method: 'POST' });
+//   }
+//   localStorage.removeItem('accessToken');
+//   localStorage.removeItem('refreshToken');
+//   localStorage.removeItem('role');
+//   window.location.href = '/signin';
+// },
 logout: async () => {
   const token = getAccessToken();
   if (token) {
-    await authenticatedFetch(`${BASE_URL}/auth/logout`, { method: 'POST' });
+    return await authenticatedFetch(`${BASE_URL}/auth/logout`, { method: 'POST' });
   }
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('role');
-  window.location.href = '/signin';
+  // Don't clear storage or navigate here—let the component do it
+  throw new Error("No token available");  // Or handle as needed
 },
 
   // Users endpoints
