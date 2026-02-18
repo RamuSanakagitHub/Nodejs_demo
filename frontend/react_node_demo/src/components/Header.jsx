@@ -5,7 +5,7 @@ const Header = () => {
   const navigate =useNavigate();
   const handleLogout = () =>{
     navigate("/signin");
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
   }
   return (
     <header className="header">

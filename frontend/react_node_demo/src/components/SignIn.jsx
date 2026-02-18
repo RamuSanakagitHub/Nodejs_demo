@@ -18,9 +18,21 @@ const SignIn = () => {
       const response = await apiService.login(email, password);
       const data = await response.json();
       if (response.ok) {
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('accessToken',data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('role', data.role);
         navigate('/dashboard');
+        
+        // Get userId from login response and call getUserById
+        const userId = data.userId;
+        if (userId) {
+          const userResponse = await apiService.getUserById(userId, data.accessToken);
+          const userData = await userResponse.json();
+          if (userResponse.ok) {
+            localStorage.setItem('user', JSON.stringify(userData));
+          }
+        }
+        
       } else {
         setError(data.message || 'Login failed');
       }

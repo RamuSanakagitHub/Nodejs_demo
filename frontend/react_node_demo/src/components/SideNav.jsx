@@ -10,6 +10,8 @@ const SideNav = () => {
     { path: '/users', label: 'Users' },
     { path: '/roles', label: 'Roles' },
     { path: '/user-roles', label: 'Assign Roles' },
+    { path: '/aggregation-dashboard', label: 'Aggregation Dashboard' },
+    { path: '/array-nested-query', label: 'Array & Nested Querying' },
   ];
 
   const menuItems = userRole === 'admin' ? allMenuItems : [{ path: '/dashboard', label: 'Dashboard' }];

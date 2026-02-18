@@ -11,7 +11,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
 
   const fetchStats = async () => {
     try {
@@ -28,7 +28,7 @@ const Dashboard = () => {
       const totalPermissions = roles.reduce((sum, role) => sum + role.permissions.length, 0);
 
       setStats({
-        totalUsers: users.length,
+        totalUsers: users.total,
         totalRoles: roles.length,
         totalPermissions,
       });

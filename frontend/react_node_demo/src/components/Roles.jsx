@@ -11,7 +11,7 @@ const Roles = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [editingRoleData, setEditingRoleData] = useState(null);
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
 
   const fetchRoles = async () => {
     try {

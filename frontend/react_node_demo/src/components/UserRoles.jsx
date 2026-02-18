@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Page.css';
 import apiService from '../services/apiService';
+import ReactPaginate from 'react-paginate';
 
 const UserRoles = () => {
   const [users, setUsers] = useState([]);
@@ -9,17 +10,22 @@ const UserRoles = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [permissions, setPermissions] = useState({});
-  const token = localStorage.getItem('token');
+  const [page, setPage]=useState(1);
+  const [pageSize, setPageSize]=useState(10);
+  const [totalPages, setTotalPages]=useState(1);
+
+  const token = localStorage.getItem('accessToken');
 
   const modules = ['Dashboard', 'Users', 'Roles', 'Assign Roles'];
   const permissionTypes = ['View', 'Create', 'Edit', 'Delete'];
 
   const fetchUsers = async () => {
     try {
-      const response = await apiService.getAllUsers(token);
+      const response = await apiService.getAllUsers(token,page,pageSize);
       if (!response.ok) throw new Error('Failed to fetch users');
-      const data = await response.json();
-      setUsers(data);
+      const result = await response.json();
+      setUsers(result.data);
+      setTotalPages(result.total_pages);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -29,7 +35,7 @@ const UserRoles = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page,pageSize]);
 
   const handleActionClick = (user) => {
     setSelectedUser(user);
@@ -99,6 +105,32 @@ const UserRoles = () => {
           ))}
         </tbody>
       </table>
+      <div style={{display:"flex", justifyContent:'space-between'}}>
+              <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPage(1); // reset to first page
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <ReactPaginate
+              previousLabel={"← Previous"}
+              nextLabel={"Next →"}
+              breakLabel={"..."}
+              pageCount={totalPages}
+              marginPagesDisplayed={2}
+              pageRangeDisplayed={5}
+              onPageChange={(selectedItem) => setPage(selectedItem.selected + 1)}
+              containerClassName={"pagination"}
+              activeClassName={"active"}
+              forcePage={page - 1} // to sync with state
+            />
+            </div>
       {showPopup && (
         <div style={{
           position: 'fixed',

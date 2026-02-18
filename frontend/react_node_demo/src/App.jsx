@@ -10,6 +10,8 @@ import Roles from './components/Roles';
 import UserRoles from './components/UserRoles';
 import socketService from './services/socketService';
 import './App.css'
+import AggregationDashboard from './components/AggregationDashboard';
+import ArrayNestedQuery from './components/ArrayNestedQuery';
 
 function App() {
   useEffect(() => {
@@ -34,6 +36,8 @@ function App() {
             <Route path="/users" element={<Users />} />
             <Route path="/roles" element={<Roles />} />
             <Route path="/user-roles" element={<UserRoles />} />
+            <Route path="/aggregation-dashboard" element={<AggregationDashboard />} />
+            <Route path="/array-nested-query" element={<ArrayNestedQuery />} />
           </Route>
         </Routes>
       </div>
